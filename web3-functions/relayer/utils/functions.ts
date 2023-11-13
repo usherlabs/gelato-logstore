@@ -26,19 +26,23 @@ export async function publishEvent(
   eventData: LogstorePayload,
   publisherURL: string,
   bearerToken: string
-): Promise<Boolean> {
+): Promise<boolean> {
   const expectedOkResponse = "OK";
   const { blockNumber, ...jsonPayload } = eventData;
-  const KYInstance = ky.create({
+  const kYInstance = ky.create({
     headers: { Authorization: `Bearer ${bearerToken}` },
   });
   try {
-    const response = await KYInstance.post(publisherURL, {
-      json: {
-        ...jsonPayload,
-      },
-    }).text();
-    console.log(`Event:${JSON.stringify(eventData)} published with response:${response}`)
+    const response = await kYInstance
+      .post(publisherURL, {
+        json: {
+          ...jsonPayload,
+        },
+      })
+      .text();
+    console.log(
+      `Event:${JSON.stringify(eventData)} published with response:${response}`
+    );
     return response === expectedOkResponse;
   } catch (err: unknown) {
     console.log(`There was an error publishing your event:${err}`);

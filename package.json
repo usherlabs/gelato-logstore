@@ -16,12 +16,10 @@
     "lint": "eslint --cache . && yarn lint:sol",
     "lint:ts": "eslint -c .eslintrc.json --ext \"**/*.ts\" \"**/*.test.ts\"",
     "lint:sol": "solhint contracts/**/*.sol",
-    "test": "npx hardhat test",
-    "postinstall": "cp -rf ../../node_modules/deno-bin ./node_modules"
+    "test": "npx hardhat test"
   },
   "license": "ISC",
   "devDependencies": {
-    "@ccamp/contracts": "*",
     "@matterlabs/hardhat-zksync-solc": "^0.3.17",
     "@matterlabs/hardhat-zksync-verify": "^0.1.8",
     "@nomicfoundation/hardhat-chai-matchers": "1.0.6",

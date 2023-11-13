@@ -3,11 +3,10 @@ import {
   Web3Function,
   Web3FunctionContext,
 } from "@gelatonetwork/web3-functions-sdk";
-import contractAddresses from "@ccamp/contracts/address.json";
-import { abi as LockerABI } from "@ccamp/contracts/artifacts/contracts/Locker.sol/Locker.json";
+import contractAddresses from "./utils/addresses.json";
+import { abi as LockerABI } from "./utils/abi.json";
 import { BLOCK_STORAGE_KEY } from "./utils/constants";
 import { mapEvent, publishEvent } from "./utils/functions";
-import ky from "ky";
 
 const MAX_RANGE = 100; // limit range of events to comply with rpc providers
 const MAX_REQUESTS = 4; // limit number of requests on every execution to avoid hitting timeout
@@ -50,7 +49,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
     const fromBlock = lastProcessedBlock + 1;
     const toBlock = Math.min(fromBlock + MAX_RANGE, currentBlock);
 
-    console.log(`Fetching log events from blocks ${fromBlock} to ${toBlock}. \n`);
+    console.log(
+      `Fetching log events from blocks ${fromBlock} to ${toBlock}. \n`
+    );
 
     try {
       const events = await lockerContract.queryFilter(
@@ -85,21 +86,21 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   // Parse the events into a more appriate form to be broadcasted
 
   // iterate through and publish each event
-  let publisherError = false;
+  let isPublisherError = false;
   let lastSavedBlock = "0";
   for await (const singleEvent of parsedEvent) {
-    const publishSuccess: Boolean = await publishEvent(
+    const willPublishSuccess: boolean = (await publishEvent(
       singleEvent,
       String(publisherURLWithStream),
       String(bearerToken)
-    );
+    )) as boolean;
     // update the last stored key to the last published event if succesfull,
-    if (publishSuccess) {
+    if (willPublishSuccess) {
       await storage.set(BLOCK_STORAGE_KEY, singleEvent.blockNumber.toString());
       lastSavedBlock = singleEvent.blockNumber.toString();
     } else {
       // otherwise break because we assume the publisher is faulty
-      publisherError = false;
+      isPublisherError = false;
       break;
     }
     // iterate through and publish each event
@@ -108,7 +109,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   // validate the response from logstore, and only update block storage only if we get an appropriate resposnse back from the api
   return {
     canExec: false,
-    message: publisherError
+    message: isPublisherError
       ? "Publisher error"
       : `Succesfully published events from ${initialBlock} to ${lastSavedBlock}`,
   };
