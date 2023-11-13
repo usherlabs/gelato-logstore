@@ -18,7 +18,7 @@
     "lint:sol": "solhint contracts/**/*.sol",
     "test": "npx hardhat test"
   },
-  "license": "ISC",
+  "license": "GPL-2.0",
   "devDependencies": {
     "@matterlabs/hardhat-zksync-solc": "^0.3.17",
     "@matterlabs/hardhat-zksync-verify": "^0.1.8",
